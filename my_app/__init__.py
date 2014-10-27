@@ -14,7 +14,7 @@ ALLOWED_LANGUAGES = {
 RECEPIENTS = ['some_receiver@gmail.com']
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = os.path.realpath('.') + '/my_app/static/uploads'
+app.config['UPLOAD_FOLDER'] = '/Users/shalabhaggarwal/workspace/mydev/flask_test_uploads'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['WTF_CSRF_SECRET_KEY'] = 'random key for form'
 db = SQLAlchemy(app)
