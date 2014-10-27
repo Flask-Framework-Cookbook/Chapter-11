@@ -1,3 +1,6 @@
+import newrelic.agent
+newrelic.agent.initialize('newrelic.ini')
+
 import os
 from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
