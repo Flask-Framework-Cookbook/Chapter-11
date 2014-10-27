@@ -8,6 +8,8 @@ from my_app.catalog.models import Product, Category, ProductForm, CategoryForm
 from sqlalchemy.orm.util import join
 from flask.ext.babel import lazy_gettext as _
 import geoip
+from boto.s3.connection import S3Connection
+
 
 catalog = Blueprint('catalog', __name__)
 
@@ -106,8 +108,17 @@ def create_product():
         image = request.files and request.files['image']
         filename = ''
         if image and allowed_file(image.filename):
-            filename = secure_filename(image.filename)
-            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            filename = image.filename
+            conn = S3Connection(
+                app.config['AWS_ACCESS_KEY'], app.config['AWS_SECRET_KEY']
+            )
+            bucket = conn.create_bucket(app.config['AWS_BUCKET'])
+            key = bucket.new_key(filename)
+            key.set_contents_from_file(image)
+            key.make_public()
+            key.set_metadata(
+                'Content-Type', 'image/' + filename.split('.')[-1].lower()
+            )
         match = geoip.geolite2.lookup(request.remote_addr)
         product = Product(
             name, price, category, filename,
