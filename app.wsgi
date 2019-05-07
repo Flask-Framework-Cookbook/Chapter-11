@@ -1,5 +1,5 @@
-activate_this = '/Users/shalabhaggarwal/workspace/mydev/bin/activate_this.py'
-execfile(activate_this, dict(__file__=activate_this))
+activate_this = '/home/ubuntu/workspace/cookbook11/bin/activate_this.py'
+exec(open(activate_this).read(), dict(__file__=activate_this))
 
 from my_app import app as application
 import sys, logging

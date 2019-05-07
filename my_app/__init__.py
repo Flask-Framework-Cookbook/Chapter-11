@@ -26,7 +26,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['WTF_CSRF_SECRET_KEY'] = 'random key for form'
 db = SQLAlchemy(app)
 
-app.config['LOG_FILE'] = 'application.log'
+app.config['LOG_FILE'] = '/tmp/application.log'
 
 
 if not app.debug:

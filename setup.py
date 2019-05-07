@@ -16,9 +16,13 @@ setup(
     ],
     platforms='any',
     install_requires=[
-        'flask',
+        'Flask>=0.10.1',
         'flask-sqlalchemy',
-        'flask-wtf'
+        'flask-wtf',
+        'flask-babel',
+        'sentry-sdk',
+        'blinker',
+        'geoip2',
     ],
     include_package_data=True,
     classifiers=[
