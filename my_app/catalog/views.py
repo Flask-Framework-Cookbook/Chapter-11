@@ -9,6 +9,7 @@ from sqlalchemy.orm.util import join
 from flask_babel import lazy_gettext as _
 import geoip2.database
 from geoip2.errors import AddressNotFoundError
+import boto3
 
 catalog = Blueprint('catalog', __name__)
 
@@ -108,12 +109,28 @@ def create_product():
         filename = ''
         if image and allowed_file(image.filename):
             filename = secure_filename(image.filename)
-            image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            session = boto3.Session(
+                aws_access_key_id=app.config['AWS_ACCESS_KEY'],
+                aws_secret_access_key=app.config['AWS_SECRET_KEY']
+            )
+            s3 = session.resource('s3')
+            bucket = s3.Bucket(app.config['AWS_BUCKET'])
+            if bucket not in list(s3.buckets.all()):
+                bucket = s3.create_bucket(
+                    Bucket=app.config['AWS_BUCKET'],
+                    CreateBucketConfiguration={
+                        'LocationConstraint': 'ap-south-1'
+                    },
+                )
+            bucket.upload_fileobj(
+                image, filename,
+                ExtraArgs={'ACL': 'public-read'})
         reader = geoip2.database.Reader('GeoLite2-City_20190416/GeoLite2-City.mmdb')
         try:
             match = reader.city(request.remote_addr)
         except AddressNotFoundError:
             match = None
+
         product = Product(
             name, price, category, filename,
             match and match.location.time_zone or 'Localhost'

@@ -24,6 +24,9 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/Users/shalabhaggarwal/workspace/mydev/flask_test_uploads'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 app.config['WTF_CSRF_SECRET_KEY'] = 'random key for form'
+app.config['AWS_ACCESS_KEY'] = 'Amazon Access Key'
+app.config['AWS_SECRET_KEY'] = 'Amazon Secret Key'
+app.config['AWS_BUCKET'] = 'flask-cookbook'
 db = SQLAlchemy(app)
 
 app.config['LOG_FILE'] = '/tmp/application.log'
