@@ -7,7 +7,9 @@ from my_app import db, ALLOWED_EXTENSIONS, babel
 from my_app.catalog.models import Product, Category, ProductForm, CategoryForm
 from sqlalchemy.orm import join
 from flask_babel import lazy_gettext as _
-import geoip2.database, geoip2.errors
+import geoip2.database
+from geoip2.errors import AddressNotFoundError
+import boto3
 
 catalog = Blueprint('catalog', __name__)
 
@@ -98,17 +100,32 @@ def create_product():
         category = Category.query.get_or_404(
             form.category.data
         )
-        image = form.image.data
-        filename = secure_filename(image.filename)
-        if allowed_file(filename):
-            image.save(os.path.join(current_app.config['UPLOAD_FOLDER'], filename))
-        reader = geoip2.database.Reader(
-            'GeoLite2-City_20230113/GeoLite2-City.mmdb'
-        )
+        image = request.files and request.files['image']
+        filename = ''
+        if image and allowed_file(image.filename):
+            filename = secure_filename(image.filename)
+            session = boto3.Session(
+                aws_access_key_id=current_app.config['AWS_ACCESS_KEY'],
+                aws_secret_access_key=current_app.config['AWS_SECRET_KEY']
+            )
+            s3 = session.resource('s3')
+            bucket = s3.Bucket(current_app.config['AWS_BUCKET'])
+            if bucket not in list(s3.buckets.all()):
+                bucket = s3.create_bucket(
+                    Bucket=current_app.config['AWS_BUCKET'],
+                    CreateBucketConfiguration={
+                        'LocationConstraint': 'ap-south-1'
+                    },
+                )
+            bucket.upload_fileobj(
+                image, filename,
+                ExtraArgs={'ACL': 'public-read'})
+        reader = geoip2.database.Reader('GeoLite2-City_20230113/GeoLite2-City.mmdb')
         try:
             match = reader.city(request.remote_addr)
         except geoip2.errors.AddressNotFoundError:
             match = None
+
         product = Product(
             name, price, category, filename,
             match and match.location.time_zone or 'Localhost'

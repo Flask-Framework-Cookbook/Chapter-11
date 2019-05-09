@@ -32,6 +32,9 @@ def create_app(alt_config={}):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
     app.config['WTF_CSRF_SECRET_KEY'] = 'random key for form'
     app.config['LOG_FILE'] = 'application.log'
+    app.config['AWS_ACCESS_KEY'] = 'Amazon Access Key'
+    app.config['AWS_SECRET_KEY'] = 'Amazon Secret Key'
+    app.config['AWS_BUCKET'] = 'flask-cookbook'
 
     app.config.update(alt_config)
 
